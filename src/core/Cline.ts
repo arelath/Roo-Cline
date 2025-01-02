@@ -77,6 +77,7 @@ export class Cline {
 	private askResponseText?: string
 	private askResponseImages?: string[]
 	private lastMessageTs?: number
+	private lastSystemPrompt?: string
 	private consecutiveMistakeCount: number = 0
 	private consecutiveMistakeCountForApplyDiff: Map<string, number> = new Map()
 	private providerRef: WeakRef<ClineProvider>
@@ -164,8 +165,14 @@ export class Cline {
 
 	private async saveApiConversationHistory() {
 		try {
-			const filePath = path.join(await this.ensureTaskDirectoryExists(), GlobalFileNames.apiConversationHistory)
+			const directoryPath = await this.ensureTaskDirectoryExists()
+			const filePath = path.join(directoryPath, GlobalFileNames.apiConversationHistory)
 			await fs.writeFile(filePath, JSON.stringify(this.apiConversationHistory))
+
+			// Capture any system message or messages that are not saved in the history for debugging purposes. 
+			const systemMessageFilePath = path.join(directoryPath, GlobalFileNames.systemMessages)
+			await fs.writeFile(systemMessageFilePath, this.lastSystemPrompt ?? "")
+
 		} catch (error) {
 			// in the off chance this fails, we don't want to stop the task
 			console.error("Failed to save API conversation history:", error)
@@ -793,6 +800,7 @@ export class Cline {
 
 		const { browserViewportSize, preferredLanguage } = await this.providerRef.deref()?.getState() ?? {}
 		const systemPrompt = await SYSTEM_PROMPT(cwd, this.api.getModel().info.supportsComputerUse ?? false, mcpHub, this.diffStrategy, browserViewportSize) + await addCustomInstructions(this.customInstructions ?? '', cwd, preferredLanguage)
+		this.lastSystemPrompt = systemPrompt
 
 		// If the previous API request's total token usage is close to the context window, truncate the conversation history to free up space for the new request
 		if (previousApiReqIndex >= 0) {
