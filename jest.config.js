@@ -38,5 +38,6 @@ module.exports = {
             diagnostics: false,
             isolatedModules: true
         }
-    }
+    },
+    reporters: ['jest-silent-reporter']
 };
