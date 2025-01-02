@@ -255,6 +255,7 @@ describe('ClineProvider', () => {
             writeDelayMs: 1000,
             browserViewportSize: "900x600",
             fuzzyMatchThreshold: 1.0,
+            useMcpServers: true
         }
         
         const message: ExtensionMessage = { 
@@ -343,6 +344,62 @@ describe('ClineProvider', () => {
         
         const state = await provider.getState()
         expect(state.writeDelayMs).toBe(1000)
+    })
+
+    test('useMcpServers defaults to true when not set', async () => {
+        // Mock globalState.get to return undefined for useMcpServers
+        (mockContext.globalState.get as jest.Mock).mockImplementation((key: string) => {
+            if (key === 'useMcpServers') {
+                return undefined
+            }
+            return null
+        })
+        
+        const state = await provider.getState()
+        expect(state.useMcpServers).toBe(true)
+    })
+
+    test('handles useMcpServers message', async () => {
+        provider.resolveWebviewView(mockWebviewView)
+        const messageHandler = (mockWebviewView.webview.onDidReceiveMessage as jest.Mock).mock.calls[0][0]
+        
+        // Test setting to false
+        await messageHandler({ type: 'useMcpServers', bool: false })
+        expect(mockContext.globalState.update).toHaveBeenCalledWith('useMcpServers', false)
+        expect(mockPostMessage).toHaveBeenCalled()
+
+        // Test setting back to true
+        await messageHandler({ type: 'useMcpServers', bool: true })
+        expect(mockContext.globalState.update).toHaveBeenCalledWith('useMcpServers', true)
+        expect(mockPostMessage).toHaveBeenCalled()
+    })
+
+    test('useMcpServers defaults to true when not set', async () => {
+        // Mock globalState.get to return undefined for useMcpServers
+        (mockContext.globalState.get as jest.Mock).mockImplementation((key: string) => {
+            if (key === 'useMcpServers') {
+                return undefined
+            }
+            return null
+        })
+        
+        const state = await provider.getState()
+        expect(state.useMcpServers).toBe(true)
+    })
+
+    test('handles useMcpServers message', async () => {
+        provider.resolveWebviewView(mockWebviewView)
+        const messageHandler = (mockWebviewView.webview.onDidReceiveMessage as jest.Mock).mock.calls[0][0]
+        
+        // Test setting to false
+        await messageHandler({ type: 'useMcpServers', bool: false })
+        expect(mockContext.globalState.update).toHaveBeenCalledWith('useMcpServers', false)
+        expect(mockPostMessage).toHaveBeenCalled()
+
+        // Test setting back to true
+        await messageHandler({ type: 'useMcpServers', bool: true })
+        expect(mockContext.globalState.update).toHaveBeenCalledWith('useMcpServers', true)
+        expect(mockPostMessage).toHaveBeenCalled()
     })
 
     test('handles writeDelayMs message', async () => {

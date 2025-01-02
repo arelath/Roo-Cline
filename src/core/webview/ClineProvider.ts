@@ -78,6 +78,7 @@ type GlobalStateKey =
 	| "preferredLanguage" // Language setting for Cline's communication
 	| "writeDelayMs"
 	| "terminalOutputLineLimit"
+	| "useMcpServers"
 
 export const GlobalFileNames = {
 	apiConversationHistory: "api_conversation_history.json",
@@ -226,7 +227,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			apiConfiguration,
 			customInstructions,
 			diffEnabled,
-			fuzzyMatchThreshold
+			fuzzyMatchThreshold,
+			useMcpServers,
 		} = await this.getState()
 		
 		this.cline = new Cline(
@@ -235,6 +237,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			customInstructions,
 			diffEnabled,
 			fuzzyMatchThreshold,
+			useMcpServers,
 			task,
 			images
 		)
@@ -246,7 +249,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			apiConfiguration,
 			customInstructions,
 			diffEnabled,
-			fuzzyMatchThreshold
+			fuzzyMatchThreshold,
+			useMcpServers,
 		} = await this.getState()
 		
 		this.cline = new Cline(
@@ -255,6 +259,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			customInstructions,
 			diffEnabled,
 			fuzzyMatchThreshold,
+			useMcpServers,
 			undefined,
 			undefined,
 			historyItem
@@ -650,6 +655,11 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						await this.updateGlobalState("terminalOutputLineLimit", message.value)
 						await this.postStateToWebview()
 						break
+					case "useMcpServers":
+						const useMcpServers = message.bool ?? true
+						await this.updateGlobalState("useMcpServers", useMcpServers)
+						await this.postStateToWebview()
+						break
 					case "deleteMessage": {
 						const answer = await vscode.window.showInformationMessage(
 							"Are you sure you want to delete this message and all subsequent messages?",
@@ -1037,9 +1047,9 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	}
 
 	async getStateToPostToWebview() {
-		const { 
-			apiConfiguration, 
-			lastShownAnnouncementId, 
+		const {
+			apiConfiguration,
+			lastShownAnnouncementId,
 			customInstructions,
 			alwaysAllowReadOnly,
 			alwaysAllowWrite,
@@ -1056,6 +1066,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			writeDelayMs,
 			terminalOutputLineLimit,
 			fuzzyMatchThreshold,
+			useMcpServers,
 		} = await this.getState()
 		
 		const allowedCommands = vscode.workspace
@@ -1087,6 +1098,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			writeDelayMs: writeDelayMs ?? 1000,
 			terminalOutputLineLimit: terminalOutputLineLimit ?? 500,
 			fuzzyMatchThreshold: fuzzyMatchThreshold ?? 1.0,
+			useMcpServers: useMcpServers ?? true,
 		}
 	}
 
@@ -1188,6 +1200,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			writeDelayMs,
 			screenshotQuality,
 			terminalOutputLineLimit,
+			useMcpServers,
 		] = await Promise.all([
 			this.getGlobalState("apiProvider") as Promise<ApiProvider | undefined>,
 			this.getGlobalState("apiModelId") as Promise<string | undefined>,
@@ -1234,6 +1247,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			this.getGlobalState("writeDelayMs") as Promise<number | undefined>,
 			this.getGlobalState("screenshotQuality") as Promise<number | undefined>,
 			this.getGlobalState("terminalOutputLineLimit") as Promise<number | undefined>,
+			this.getGlobalState("useMcpServers") as Promise<boolean | undefined>,
 		])
 
 		let apiProvider: ApiProvider
@@ -1297,6 +1311,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			fuzzyMatchThreshold: fuzzyMatchThreshold ?? 1.0,
 			writeDelayMs: writeDelayMs ?? 1000,
 			terminalOutputLineLimit: terminalOutputLineLimit ?? 500,
+			useMcpServers: useMcpServers ?? true,
 			preferredLanguage: preferredLanguage ?? (() => {
 				// Get VSCode's locale setting
 				const vscodeLang = vscode.env.language;

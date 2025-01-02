@@ -69,6 +69,7 @@ export class Cline {
 	customInstructions?: string
 	diffStrategy?: DiffStrategy
 	diffEnabled: boolean = false
+	useMcpServer: boolean = true
 
 	apiConversationHistory: (Anthropic.MessageParam & { ts?: number })[] = []
 	clineMessages: ClineMessage[] = []
@@ -101,6 +102,7 @@ export class Cline {
 		customInstructions?: string,
 		enableDiff?: boolean,
 		fuzzyMatchThreshold?: number,
+		useMcpServer?: boolean,
 		task?: string | undefined,
 		images?: string[] | undefined,
 		historyItem?: HistoryItem | undefined,
@@ -113,6 +115,7 @@ export class Cline {
 		this.diffViewProvider = new DiffViewProvider(cwd)
 		this.customInstructions = customInstructions
 		this.diffEnabled = enableDiff ?? false
+		this.useMcpServer = useMcpServer ?? true
 		if (this.diffEnabled && this.api.getModel().id) {
 			this.diffStrategy = getDiffStrategy(this.api.getModel().id, fuzzyMatchThreshold ?? 1.0)
 		}

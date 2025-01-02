@@ -48,6 +48,8 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 		setScreenshotQuality,
 		terminalOutputLineLimit,
 		setTerminalOutputLineLimit,
+		useMcpServers,
+		setUseMcpServers,
 	} = useExtensionState()
 	const [apiErrorMessage, setApiErrorMessage] = useState<string | undefined>(undefined)
 	const [modelIdErrorMessage, setModelIdErrorMessage] = useState<string | undefined>(undefined)
@@ -79,6 +81,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 			vscode.postMessage({ type: "writeDelayMs", value: writeDelayMs })
 			vscode.postMessage({ type: "screenshotQuality", value: screenshotQuality ?? 75 })
 			vscode.postMessage({ type: "terminalOutputLineLimit", value: terminalOutputLineLimit ?? 500 })
+			vscode.postMessage({ type: "useMcpServers", bool: useMcpServers })
 			onDone()
 		}
 	}
@@ -151,6 +154,19 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 				<div style={{ marginBottom: 5 }}>
 					<div style={{ marginBottom: 15 }}>
 						<h3 style={{ color: "var(--vscode-foreground)", margin: 0, marginBottom: 15 }}>Agent Settings</h3>
+
+						<VSCodeCheckbox
+							checked={useMcpServers} onChange={(e: any) => setUseMcpServers(e.target.checked)}>
+							<span style={{ fontWeight: "500" }}>Use MCP Servers</span>
+						</VSCodeCheckbox>
+						<p style={{
+							fontSize: "12px",
+							marginTop: "5px",
+							marginBottom: "15px",
+							color: "var(--vscode-descriptionForeground)",
+						}}>
+							When enabled, Cline will include MCP server functionality in its capabilities. Disable to reduce token usage if you don't use MCP servers.
+						</p>
 
 						<label style={{ fontWeight: "500", display: "block", marginBottom: 5 }}>Preferred Language</label>
 						<select
