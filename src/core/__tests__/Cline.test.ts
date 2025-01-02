@@ -3,6 +3,8 @@ import { ClineProvider } from '../webview/ClineProvider';
 import { ApiConfiguration } from '../../shared/api';
 import { ApiStreamChunk } from '../../api/transform/stream';
 import * as vscode from 'vscode';
+import { SYSTEM_PROMPT } from '../prompts/system';
+import { McpHub } from '../../services/mcp/McpHub';
 
 // Mock all MCP-related modules
 jest.mock('@modelcontextprotocol/sdk/types.js', () => ({
@@ -277,6 +279,13 @@ describe('Cline', () => {
     });
 
     describe('constructor', () => {
+        const mockCwd = '/mock/workspace/path';
+        const mockMcpHub = {
+            getServers: jest.fn().mockReturnValue([]),
+            getMcpServersPath: jest.fn().mockResolvedValue('/mock/path'),
+            getMcpSettingsFilePath: jest.fn().mockResolvedValue('/mock/settings.json')
+        } as unknown as McpHub;
+
         it('should respect provided settings', () => {
             const cline = new Cline(
                 mockProvider,
@@ -284,6 +293,7 @@ describe('Cline', () => {
                 'custom instructions',
                 false,
                 0.95, // 95% threshold
+                true,
                 'test task'
             );
 
@@ -298,6 +308,7 @@ describe('Cline', () => {
                 'custom instructions',
                 true,
                 undefined,
+                true,
                 'test task'
             );
 
@@ -315,6 +326,7 @@ describe('Cline', () => {
                 'custom instructions',
                 true,
                 0.9, // 90% threshold
+                true,
                 'test task'
             );
 
@@ -334,6 +346,7 @@ describe('Cline', () => {
                 'custom instructions',
                 true,
                 undefined,
+                true,
                 'test task'
             );
 
@@ -352,10 +365,26 @@ describe('Cline', () => {
                     undefined, // customInstructions
                     false, // diffEnabled
                     undefined, // fuzzyMatchThreshold
+                    undefined, // useMcpServer
                     undefined // task
                 );
             }).toThrow('Either historyItem or task/images must be provided');
         });
+
+        it('should not include MCP text in system prompt when MCP servers are disabled', async () => {            
+            const systemPrompt = await SYSTEM_PROMPT(mockCwd, false, mockMcpHub, undefined, undefined, false);
+            expect(systemPrompt).not.toContain('MCP SERVERS');
+            expect(systemPrompt).not.toContain('use_mcp_tool');
+            expect(systemPrompt).not.toContain('access_mcp_resource');
+        });
+
+        it('should include MCP text in system prompt when MCP servers are enabled', async () => {            
+            const systemPrompt = await SYSTEM_PROMPT(mockCwd, false, mockMcpHub, undefined, undefined, true);
+            expect(systemPrompt).toContain('MCP SERVERS');
+            expect(systemPrompt).toContain('use_mcp_tool');
+            expect(systemPrompt).toContain('access_mcp_resource');
+        });
+
     });
 
     describe('getEnvironmentDetails', () => {
@@ -409,6 +438,7 @@ describe('Cline', () => {
                 undefined,
                 false,
                 undefined,
+                true,
                 'test task'
             );
 
@@ -429,6 +459,7 @@ describe('Cline', () => {
                     undefined,
                     false,
                     undefined,
+                    true,
                     'test task'
                 );
     

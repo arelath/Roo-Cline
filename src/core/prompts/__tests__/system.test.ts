@@ -108,5 +108,39 @@ describe('system.ts', () => {
       const result = await addCustomInstructions('', tempDir)
       expect(result).toBe('')
     })
+
+    it('should include MCP server settings in custom instructions', async () => {
+      // Create test rule files with MCP server configuration
+      await fs.writeFile(path.join(tempDir, '.clinerules'), `
+# MCP Server Settings
+- Use MCP server at http://localhost:3000
+- Enable MCP server integration
+      `)
+
+      const customInstructions = 'Base instructions'
+      const result = await addCustomInstructions(customInstructions, tempDir)
+
+      // Verify MCP server settings are included
+      expect(result).toContain('Base instructions')
+      expect(result).toContain('Use MCP server at http://localhost:3000')
+      expect(result).toContain('Enable MCP server integration')
+      expect(result).toContain('Rules from .clinerules:')
+    })
+
+    it('should handle MCP server settings when disabled', async () => {
+      // Create test rule files with MCP server configuration but disabled
+      await fs.writeFile(path.join(tempDir, '.clinerules'), `
+# MCP Server Settings
+- Disable MCP server integration
+      `)
+
+      const customInstructions = 'Base instructions'
+      const result = await addCustomInstructions(customInstructions, tempDir)
+
+      // Verify MCP server settings are included
+      expect(result).toContain('Base instructions')
+      expect(result).toContain('Disable MCP server integration')
+      expect(result).toContain('Rules from .clinerules:')
+    })
   })
 })

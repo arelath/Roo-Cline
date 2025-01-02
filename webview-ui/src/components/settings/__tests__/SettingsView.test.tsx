@@ -312,3 +312,51 @@ describe('SettingsView - Allowed Commands', () => {
     expect(onDone).toHaveBeenCalled()
   })
 })
+
+describe('SettingsView - MCP Servers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('initializes with MCP servers enabled by default', () => {
+    renderSettingsView()
+    
+    const mcpCheckbox = screen.getByRole('checkbox', {
+      name: /Use MCP Servers/i
+    })
+    expect(mcpCheckbox).toBeChecked()
+  })
+
+  it('toggles MCP servers setting and sends message to VSCode', () => {
+    renderSettingsView()
+    
+    const mcpCheckbox = screen.getByRole('checkbox', {
+      name: /Use MCP Servers/i
+    })
+    
+    // Disable MCP servers
+    fireEvent.click(mcpCheckbox)
+    expect(mcpCheckbox).not.toBeChecked()
+    
+    // Click Done to save settings
+    const doneButton = screen.getByText('Done')
+    fireEvent.click(doneButton)
+    
+    expect(vscode.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'useMcpServers',
+        bool: true
+      })
+    )
+  })
+
+  it('displays correct label and description', () => {
+    renderSettingsView()
+    
+    // Verify label is present
+    expect(screen.getByText('Use MCP Servers')).toBeInTheDocument()
+    
+    // Verify description is present
+    expect(screen.getByText(/When enabled, Cline will include MCP server functionality in its capabilities/i)).toBeInTheDocument()
+  })
+})
