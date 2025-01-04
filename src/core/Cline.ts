@@ -173,6 +173,15 @@ export class Cline {
 			const systemMessageFilePath = path.join(directoryPath, GlobalFileNames.systemMessages)
 			await fs.writeFile(systemMessageFilePath, this.lastSystemPrompt ?? "")
 
+			// Write out the full conversation with all details
+			const verboseFilePath = path.join(directoryPath, GlobalFileNames.apiConversationHistoryVerbose)
+			const verboseHistory = [
+				{ role: "system", content: this.lastSystemPrompt ?? "" },
+				...this.apiConversationHistory.map(({ role, content }) => ({ role, content }))
+			]
+			
+			await fs.writeFile(verboseFilePath, JSON.stringify(verboseHistory, null, 2))
+
 		} catch (error) {
 			// in the off chance this fails, we don't want to stop the task
 			console.error("Failed to save API conversation history:", error)

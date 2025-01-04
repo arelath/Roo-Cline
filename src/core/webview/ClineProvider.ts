@@ -82,6 +82,7 @@ type GlobalStateKey =
 
 export const GlobalFileNames = {
 	apiConversationHistory: "api_conversation_history.json",
+	apiConversationHistoryVerbose: "api_conversation_history_verbose.json",
 	uiMessages: "ui_messages.json",
 	openRouterModels: "openrouter_models.json",
 	mcpSettings: "cline_mcp_settings.json",
