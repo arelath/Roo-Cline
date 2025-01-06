@@ -987,7 +987,7 @@ export class Cline {
 					break
 				}
 
-				const pushToolResult = (content: ToolResponse) => {
+				const pushToolResult = (content: ToolResponse, multipleCallsAllowed: boolean = false) => {
 					this.userMessageContent.push({
 						type: "text",
 						text: `${toolDescription()} Result:`,
@@ -1001,7 +1001,9 @@ export class Cline {
 						this.userMessageContent.push(...content)
 					}
 					// once a tool result has been collected, ignore all other tool uses since we should only ever present one tool result per message
-					this.didAlreadyUseTool = true
+					if(multipleCallsAllowed === false) {
+						this.didAlreadyUseTool = true
+					}
 				}
 
 				const askApproval = async (type: ClineAsk, partialMessage?: string) => {
@@ -1010,7 +1012,7 @@ export class Cline {
 						if (response === "messageResponse") {
 							await this.say("user_feedback", text, images)
 							pushToolResult(
-								formatResponse.toolResult(formatResponse.toolDeniedWithFeedback(text), images),
+								formatResponse.toolResult(formatResponse.toolDeniedWithFeedback(text), images)
 							)
 							// this.userMessageContent.push({
 							// 	type: "text",
@@ -1268,12 +1270,12 @@ export class Cline {
 							} else {
 								if (!relPath) {
 									this.consecutiveMistakeCount++
-									pushToolResult(await this.sayAndCreateMissingParamError("apply_diff", "path"))
+									pushToolResult(await this.sayAndCreateMissingParamError("apply_diff", "path"), true)
 									break
 								}
 								if (!diffContent) {
 									this.consecutiveMistakeCount++
-									pushToolResult(await this.sayAndCreateMissingParamError("apply_diff", "diff"))
+									pushToolResult(await this.sayAndCreateMissingParamError("apply_diff", "diff"), true)
 									break
 								}
 
@@ -1284,7 +1286,7 @@ export class Cline {
 									this.consecutiveMistakeCount++
 									const formattedError = `File does not exist at path: ${absolutePath}\n\n<error_details>\nThe specified file could not be found. Please verify the file path and try again.\n</error_details>`
 									await this.say("error", formattedError)
-									pushToolResult(formattedError)
+									pushToolResult(formattedError, true)
 									break
 								}
 
@@ -1309,7 +1311,7 @@ export class Cline {
 									if (currentCount >= 2) {
 										await this.say("error", formattedError)
 									}
-									pushToolResult(formattedError)
+									pushToolResult(formattedError, true)
 									break
 								}
 
@@ -1383,7 +1385,7 @@ export class Cline {
 							} else {
 								if (!relPath) {
 									this.consecutiveMistakeCount++
-									pushToolResult(await this.sayAndCreateMissingParamError("read_file", "path"))
+									pushToolResult(await this.sayAndCreateMissingParamError("read_file", "path"), true)
 									break
 								}
 								this.consecutiveMistakeCount = 0
@@ -1398,7 +1400,7 @@ export class Cline {
 								}
 								// now execute the tool like normal
 								const content = await extractTextFromFile(absolutePath)
-								pushToolResult(content)
+								pushToolResult(content, true)
 								break
 							}
 						} catch (error) {
@@ -2397,6 +2399,7 @@ export class Cline {
 		const visibleFiles = vscode.window.visibleTextEditors
 			?.map((editor) => editor.document?.uri?.fsPath)
 			.filter(Boolean)
+			.filter((absolutePath) => absolutePath.startsWith(cwd) && fileExistsAtPath(absolutePath))
 			.map((absolutePath) => path.relative(cwd, absolutePath).toPosix())
 			.join("\n")
 		if (visibleFiles) {
@@ -2405,11 +2408,13 @@ export class Cline {
 			details += "\n(No visible files)"
 		}
 
+		// Not every tab has a backing file, so we only include tabs that have a backing file in the workspace
 		details += "\n\n# VSCode Open Tabs"
 		const openTabs = vscode.window.tabGroups.all
 			.flatMap((group) => group.tabs)
 			.map((tab) => (tab.input as vscode.TabInputText)?.uri?.fsPath)
 			.filter(Boolean)
+			.filter((absolutePath) => absolutePath.startsWith(cwd) && fileExistsAtPath(absolutePath))
 			.map((absolutePath) => path.relative(cwd, absolutePath).toPosix())
 			.join("\n")
 		if (openTabs) {
