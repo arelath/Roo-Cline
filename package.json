@@ -248,6 +248,7 @@
 		"fast-deep-equal": "^3.1.3",
 		"fastest-levenshtein": "^1.0.16",
 		"globby": "^14.0.2",
+		"handlebars": "^4.7.8",
 		"isbinaryfile": "^5.0.2",
 		"mammoth": "^1.8.0",
 		"monaco-vscode-textmate-theme-converter": "^0.1.7",
@@ -276,5 +277,8 @@
 			"prettier --write",
 			"npx eslint -c .eslintrc.json --fix"
 		]
+	},
+	"optionalDependencies": {
+		"@esbuild/win32-x64": "^0.24.2"
 	}
 }

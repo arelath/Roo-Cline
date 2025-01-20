@@ -102,21 +102,21 @@ async function generatePrompt(
 ): Promise<string> {
 	const basePrompt = `${promptComponent?.roleDefinition || getRoleDefinition(mode)}
 
-${getSharedToolUseSection()}
+${await getSharedToolUseSection()}
 
 ${getToolDescriptionsForMode(mode, cwd, supportsComputerUse, diffStrategy, browserViewportSize, mcpHub)}
 
-${getToolUseGuidelinesSection()}
+${await getToolUseGuidelinesSection()}
 
 ${await getMcpServersSection(mcpHub, diffStrategy)}
 
-${getCapabilitiesSection(cwd, supportsComputerUse, mcpHub, diffStrategy)}
+${await getCapabilitiesSection(cwd, supportsComputerUse, mcpHub, diffStrategy)}
 
-${getRulesSection(cwd, supportsComputerUse, diffStrategy)}
+${await getRulesSection(cwd, supportsComputerUse, diffStrategy)}
 
-${getSystemInfoSection(cwd)}
+${await getSystemInfoSection(cwd)}
 
-${getObjectiveSection()}`
+${await getObjectiveSection()}`
 
 	return basePrompt
 }
