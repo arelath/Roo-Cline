@@ -54,6 +54,15 @@ const mockProvider = {
 				version: "1.0.0",
 			},
 		},
+		subscriptions: [],
+		globalState: {
+			get: jest.fn(),
+			update: jest.fn(),
+		},
+		workspaceState: {
+			get: jest.fn(),
+			update: jest.fn(),
+		},
 	},
 } as unknown as ClineProvider
 
@@ -90,18 +99,28 @@ describe("SYSTEM_PROMPT", () => {
 
 	it("should maintain consistent system prompt", async () => {
 		const prompt = await SYSTEM_PROMPT(
+			mockProvider.context, // ExtensionContext
 			"/test/path",
 			false, // supportsComputerUse
 			undefined, // mcpHub
 			undefined, // diffStrategy
 			undefined, // browserViewportSize
+			undefined, // mode
 		)
 
 		expect(prompt).toMatchSnapshot()
 	})
 
 	it("should include browser actions when supportsComputerUse is true", async () => {
-		const prompt = await SYSTEM_PROMPT("/test/path", true, undefined, undefined, "1280x800")
+		const prompt = await SYSTEM_PROMPT(
+			mockProvider.context,
+			"/test/path",
+			true,
+			undefined,
+			undefined,
+			"1280x800",
+			undefined,
+		)
 
 		expect(prompt).toMatchSnapshot()
 	})
@@ -109,16 +128,26 @@ describe("SYSTEM_PROMPT", () => {
 	it("should include MCP server info when mcpHub is provided", async () => {
 		mockMcpHub = createMockMcpHub()
 
-		const prompt = await SYSTEM_PROMPT("/test/path", false, mockMcpHub)
+		const prompt = await SYSTEM_PROMPT(
+			mockProvider.context,
+			"/test/path",
+			false,
+			mockMcpHub,
+			undefined,
+			undefined,
+			undefined,
+		)
 
 		expect(prompt).toMatchSnapshot()
 	})
 
 	it("should explicitly handle undefined mcpHub", async () => {
 		const prompt = await SYSTEM_PROMPT(
+			mockProvider.context,
 			"/test/path",
 			false,
 			undefined, // explicitly undefined mcpHub
+			undefined,
 			undefined,
 			undefined,
 		)
@@ -128,11 +157,13 @@ describe("SYSTEM_PROMPT", () => {
 
 	it("should handle different browser viewport sizes", async () => {
 		const prompt = await SYSTEM_PROMPT(
+			mockProvider.context,
 			"/test/path",
 			true,
 			undefined,
 			undefined,
 			"900x600", // different viewport size
+			undefined,
 		)
 
 		expect(prompt).toMatchSnapshot()
@@ -140,10 +171,12 @@ describe("SYSTEM_PROMPT", () => {
 
 	it("should include diff strategy tool description", async () => {
 		const prompt = await SYSTEM_PROMPT(
+			mockProvider.context,
 			"/test/path",
 			false,
 			undefined,
 			new SearchReplaceDiffStrategy(), // Use actual diff strategy from the codebase
+			undefined,
 			undefined,
 		)
 
@@ -161,13 +194,29 @@ describe("addCustomInstructions", () => {
 	})
 
 	it("should generate correct prompt for architect mode", async () => {
-		const prompt = await SYSTEM_PROMPT("/test/path", false, undefined, undefined, undefined, "architect")
+		const prompt = await SYSTEM_PROMPT(
+			mockProvider.context,
+			"/test/path",
+			false,
+			undefined,
+			undefined,
+			undefined,
+			"architect",
+		)
 
 		expect(prompt).toMatchSnapshot()
 	})
 
 	it("should generate correct prompt for ask mode", async () => {
-		const prompt = await SYSTEM_PROMPT("/test/path", false, undefined, undefined, undefined, "ask")
+		const prompt = await SYSTEM_PROMPT(
+			mockProvider.context,
+			"/test/path",
+			false,
+			undefined,
+			undefined,
+			undefined,
+			"ask",
+		)
 
 		expect(prompt).toMatchSnapshot()
 	})

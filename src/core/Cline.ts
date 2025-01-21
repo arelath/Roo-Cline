@@ -813,6 +813,7 @@ export class Cline {
 			(await this.providerRef.deref()?.getState()) ?? {}
 		const systemPrompt =
 			(await SYSTEM_PROMPT(
+				this.providerRef.deref()?.context!,
 				cwd,
 				this.api.getModel().info.supportsComputerUse ?? false,
 				mcpHub,

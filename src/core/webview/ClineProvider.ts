@@ -965,6 +965,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							)
 
 							const systemPrompt = await SYSTEM_PROMPT(
+								this.context,
 								cwd,
 								apiConfiguration.openRouterModelInfo?.supportsComputerUse ?? false,
 								mcpEnabled ? this.mcpHub : undefined,

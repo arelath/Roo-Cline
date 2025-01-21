@@ -34,7 +34,9 @@ function toPosixPath(p: string) {
 		return p
 	}
 
-	return p.replace(/\\/g, "/")
+	// Remove drive letter for Windows paths
+	const noDrivePath = p.replace(/^[A-Za-z]:/, "")
+	return noDrivePath.replace(/\\/g, "/")
 }
 
 // Declaration merging allows us to add a new method to the String type
@@ -75,27 +77,35 @@ function normalizePath(p: string): string {
 	if (normalized.length > 1 && (normalized.endsWith("/") || normalized.endsWith("\\"))) {
 		normalized = normalized.slice(0, -1)
 	}
-	return normalized
+	return normalized.toPosix()
 }
 
 export function getReadablePath(cwd: string, relPath?: string): string {
 	relPath = relPath || ""
+
+	// Normalize both cwd and relPath to remove drive letters and standardize separators
+	cwd = cwd.toPosix()
+	relPath = relPath.toPosix()
+
 	// path.resolve is flexible in that it will resolve relative paths like '../../' to the cwd and even ignore the cwd if the relPath is actually an absolute path
-	const absolutePath = path.resolve(cwd, relPath)
-	if (arePathsEqual(cwd, path.join(os.homedir(), "Desktop"))) {
+	const absolutePath = path.resolve(cwd, relPath).toPosix()
+
+	if (arePathsEqual(cwd, path.join(os.homedir(), "Desktop").toPosix())) {
 		// User opened vscode without a workspace, so cwd is the Desktop. Show the full absolute path to keep the user aware of where files are being created
-		return absolutePath.toPosix()
+		return absolutePath
 	}
-	if (arePathsEqual(path.normalize(absolutePath), path.normalize(cwd))) {
-		return path.basename(absolutePath).toPosix()
+
+	if (arePathsEqual(absolutePath, cwd)) {
+		return path.basename(absolutePath)
 	} else {
 		// show the relative path to the cwd
-		const normalizedRelPath = path.relative(cwd, absolutePath)
+		const normalizedRelPath = path.relative(cwd, absolutePath).toPosix()
+
 		if (absolutePath.includes(cwd)) {
-			return normalizedRelPath.toPosix()
+			return normalizedRelPath
 		} else {
 			// we are outside the cwd, so show the absolute path (useful for when cline passes in '../../' for example)
-			return absolutePath.toPosix()
+			return absolutePath
 		}
 	}
 }

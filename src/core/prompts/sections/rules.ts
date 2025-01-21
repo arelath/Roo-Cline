@@ -2,8 +2,10 @@ import { DiffStrategy } from "../../diff/DiffStrategy"
 import { renderTemplate } from "../template-loader"
 import fs from "fs/promises"
 import path from "path"
+import * as vscode from "vscode"
 
 export async function getRulesSection(
+	extensionContext: vscode.ExtensionContext,
 	cwd: string,
 	supportsComputerUse: boolean,
 	diffStrategy?: DiffStrategy,
@@ -23,9 +25,13 @@ export async function getRulesSection(
 	}
 
 	// If no custom rules, fall back to template
-	return renderTemplate("rules", {
-		cwd: cwd.toPosix(),
-		supportsComputerUse,
-		diffStrategy: !!diffStrategy,
-	})
+	return renderTemplate(
+		"rules",
+		{
+			cwd: cwd.toPosix(),
+			supportsComputerUse,
+			diffStrategy: !!diffStrategy,
+		},
+		extensionContext,
+	)
 }

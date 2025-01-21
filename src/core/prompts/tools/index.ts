@@ -13,6 +13,7 @@ import { DiffStrategy } from "../../diff/DiffStrategy"
 import { McpHub } from "../../../services/mcp/McpHub"
 import { Mode, ToolName, getModeConfig, isToolAllowedForMode } from "../../../shared/modes"
 import { ToolArgs } from "./types"
+import * as vscode from "vscode"
 
 // Map of tool names to their description functions
 const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined> = {
@@ -32,6 +33,7 @@ const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined>
 }
 
 export function getToolDescriptionsForMode(
+	extensionContext: vscode.ExtensionContext,
 	mode: Mode,
 	cwd: string,
 	supportsComputerUse: boolean,

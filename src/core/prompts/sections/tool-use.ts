@@ -1,4 +1,6 @@
-export function getSharedToolUseSection(): string {
+import * as vscode from "vscode"
+
+export function getSharedToolUseSection(extensionContext: vscode.ExtensionContext): string {
 	return `====
 
 TOOL USE

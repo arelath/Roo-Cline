@@ -13,6 +13,7 @@ import {
 } from "./sections"
 import fs from "fs/promises"
 import path from "path"
+import * as vscode from "vscode"
 
 async function loadRuleFiles(cwd: string, mode: Mode): Promise<string> {
 	let combinedRules = ""
@@ -92,6 +93,7 @@ ${joinedInstructions}`
 }
 
 async function generatePrompt(
+	extensionContext: vscode.ExtensionContext,
 	cwd: string,
 	supportsComputerUse: boolean,
 	mode: Mode,
@@ -102,26 +104,27 @@ async function generatePrompt(
 ): Promise<string> {
 	const basePrompt = `${promptComponent?.roleDefinition || getRoleDefinition(mode)}
 
-${await getSharedToolUseSection()}
+${await getSharedToolUseSection(extensionContext)}
 
-${getToolDescriptionsForMode(mode, cwd, supportsComputerUse, diffStrategy, browserViewportSize, mcpHub)}
+${getToolDescriptionsForMode(extensionContext, mode, cwd, supportsComputerUse, diffStrategy, browserViewportSize, mcpHub)}
 
-${await getToolUseGuidelinesSection()}
+${await getToolUseGuidelinesSection(extensionContext)}
 
-${await getMcpServersSection(mcpHub, diffStrategy)}
+${await getMcpServersSection(extensionContext, mcpHub, diffStrategy)}
 
-${await getCapabilitiesSection(cwd, supportsComputerUse, mcpHub, diffStrategy)}
+${await getCapabilitiesSection(extensionContext, cwd, supportsComputerUse, mcpHub, diffStrategy)}
 
-${await getRulesSection(cwd, supportsComputerUse, diffStrategy)}
+${await getRulesSection(extensionContext, cwd, supportsComputerUse, diffStrategy)}
 
-${await getSystemInfoSection(cwd)}
+${await getSystemInfoSection(extensionContext, cwd)}
 
-${await getObjectiveSection()}`
+${await getObjectiveSection(extensionContext)}`
 
 	return basePrompt
 }
 
 export const SYSTEM_PROMPT = async (
+	extensionContext: vscode.ExtensionContext,
 	cwd: string,
 	supportsComputerUse: boolean,
 	mcpHub?: McpHub,
@@ -142,6 +145,7 @@ export const SYSTEM_PROMPT = async (
 	const promptComponent = getPromptComponent(customPrompts?.[currentMode.slug])
 
 	return generatePrompt(
+		extensionContext,
 		cwd,
 		supportsComputerUse,
 		currentMode.slug,

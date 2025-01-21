@@ -40,3 +40,6 @@ webview-ui/node_modules/**
 
 # Include icons
 !assets/icons/**
+
+# Include Handlebars template files
+!src/core/prompts/templates/**/*.hbs
