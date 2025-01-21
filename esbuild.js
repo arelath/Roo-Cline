@@ -25,6 +25,28 @@ const esbuildProblemMatcherPlugin = {
 	},
 }
 
+const copyTemplateFiles = {
+	name: "copy-template-files",
+	setup(build) {
+		build.onEnd(() => {
+			const sourceDir = path.join(__dirname, "src", "core", "prompts", "templates")
+			const targetDir = path.join(__dirname, "dist", "core", "prompts", "templates")
+
+			// Create target directory if it doesn't exist
+			if (!fs.existsSync(targetDir)) {
+				fs.mkdirSync(targetDir, { recursive: true })
+			}
+
+			// Copy all .hbs files
+			fs.readdirSync(sourceDir).forEach((file) => {
+				if (file.endsWith(".hbs")) {
+					fs.copyFileSync(path.join(sourceDir, file), path.join(targetDir, file))
+				}
+			})
+		})
+	},
+}
+
 const copyWasmFiles = {
 	name: "copy-wasm-files",
 	setup(build) {
@@ -69,6 +91,7 @@ const extensionConfig = {
 	logLevel: "silent",
 	plugins: [
 		copyWasmFiles,
+		copyTemplateFiles,
 		/* add to the end of plugins array */
 		esbuildProblemMatcherPlugin,
 	],

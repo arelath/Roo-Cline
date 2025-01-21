@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
+import { PromptContext } from "../system"
 
-export function getSharedToolUseSection(extensionContext: vscode.ExtensionContext): string {
+export function getSharedToolUseSection(extensionContext: vscode.ExtensionContext, context: PromptContext): string {
 	return `====
 
 TOOL USE

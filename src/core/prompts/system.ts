@@ -15,6 +15,16 @@ import fs from "fs/promises"
 import path from "path"
 import * as vscode from "vscode"
 
+export type PromptContext = {
+	cwd: string
+	supportsComputerUse: boolean
+	mode: Mode
+	mcpHub?: McpHub
+	diffStrategy?: DiffStrategy
+	browserViewportSize?: string
+	promptComponent?: PromptComponent
+}
+
 async function loadRuleFiles(cwd: string, mode: Mode): Promise<string> {
 	let combinedRules = ""
 
@@ -92,33 +102,24 @@ ${joinedInstructions}`
 		: ""
 }
 
-async function generatePrompt(
-	extensionContext: vscode.ExtensionContext,
-	cwd: string,
-	supportsComputerUse: boolean,
-	mode: Mode,
-	mcpHub?: McpHub,
-	diffStrategy?: DiffStrategy,
-	browserViewportSize?: string,
-	promptComponent?: PromptComponent,
-): Promise<string> {
-	const basePrompt = `${promptComponent?.roleDefinition || getRoleDefinition(mode)}
+async function generatePrompt(extensionContext: vscode.ExtensionContext, context: PromptContext): Promise<string> {
+	const basePrompt = `${context.promptComponent?.roleDefinition || getRoleDefinition(context.mode)}
 
-${await getSharedToolUseSection(extensionContext)}
+${await getSharedToolUseSection(extensionContext, context)}
 
-${getToolDescriptionsForMode(extensionContext, mode, cwd, supportsComputerUse, diffStrategy, browserViewportSize, mcpHub)}
+${getToolDescriptionsForMode(extensionContext, context)}
 
-${await getToolUseGuidelinesSection(extensionContext)}
+${await getToolUseGuidelinesSection(extensionContext, context)}
 
-${await getMcpServersSection(extensionContext, mcpHub, diffStrategy)}
+${await getMcpServersSection(extensionContext, context)}
 
-${await getCapabilitiesSection(extensionContext, cwd, supportsComputerUse, mcpHub, diffStrategy)}
+${await getCapabilitiesSection(extensionContext, context)}
 
-${await getRulesSection(extensionContext, cwd, supportsComputerUse, diffStrategy)}
+${await getRulesSection(extensionContext, context)}
 
-${await getSystemInfoSection(extensionContext, cwd)}
+${await getSystemInfoSection(extensionContext, context)}
 
-${await getObjectiveSection(extensionContext)}`
+${await getObjectiveSection(extensionContext, context)}`
 
 	return basePrompt
 }
@@ -144,14 +145,15 @@ export const SYSTEM_PROMPT = async (
 	const currentMode = modes.find((m) => m.slug === mode) || modes[0]
 	const promptComponent = getPromptComponent(customPrompts?.[currentMode.slug])
 
-	return generatePrompt(
-		extensionContext,
+	const context: PromptContext = {
 		cwd,
 		supportsComputerUse,
-		currentMode.slug,
+		mode: currentMode.slug,
 		mcpHub,
 		diffStrategy,
 		browserViewportSize,
 		promptComponent,
-	)
+	}
+
+	return generatePrompt(extensionContext, context)
 }

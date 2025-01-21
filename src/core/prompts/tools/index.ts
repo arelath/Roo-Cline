@@ -14,6 +14,7 @@ import { McpHub } from "../../../services/mcp/McpHub"
 import { Mode, ToolName, getModeConfig, isToolAllowedForMode } from "../../../shared/modes"
 import { ToolArgs } from "./types"
 import * as vscode from "vscode"
+import { PromptContext } from "../system"
 
 // Map of tool names to their description functions
 const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined> = {
@@ -32,28 +33,20 @@ const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined>
 		args.diffStrategy ? args.diffStrategy.getToolDescription({ cwd: args.cwd, toolOptions: args.toolOptions }) : "",
 }
 
-export function getToolDescriptionsForMode(
-	extensionContext: vscode.ExtensionContext,
-	mode: Mode,
-	cwd: string,
-	supportsComputerUse: boolean,
-	diffStrategy?: DiffStrategy,
-	browserViewportSize?: string,
-	mcpHub?: McpHub,
-): string {
-	const config = getModeConfig(mode)
+export function getToolDescriptionsForMode(extensionContext: vscode.ExtensionContext, context: PromptContext): string {
+	const config = getModeConfig(context.mode)
 	const args: ToolArgs = {
-		cwd,
-		supportsComputerUse,
-		diffStrategy,
-		browserViewportSize,
-		mcpHub,
+		cwd: context.cwd,
+		supportsComputerUse: context.supportsComputerUse,
+		diffStrategy: context.diffStrategy,
+		browserViewportSize: context.browserViewportSize,
+		mcpHub: context.mcpHub,
 	}
 
 	// Map tool descriptions in the exact order specified in the mode's tools array
 	const descriptions = config.tools.map(([toolName, toolOptions]) => {
 		const descriptionFn = toolDescriptionMap[toolName]
-		if (!descriptionFn || !isToolAllowedForMode(toolName as ToolName, mode)) {
+		if (!descriptionFn || !isToolAllowedForMode(toolName as ToolName, context.mode)) {
 			return undefined
 		}
 
