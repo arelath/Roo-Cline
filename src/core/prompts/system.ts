@@ -98,7 +98,7 @@ async function generatePrompt(extensionContext: vscode.ExtensionContext, context
 
 ${await getSharedToolUseSection(context)}
 
-${getToolDescriptionsForMode(context)}
+${await getToolDescriptionsForMode(context)}
 
 ${await getToolUseGuidelinesSection(context)}
 

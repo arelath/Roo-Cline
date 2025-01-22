@@ -32,7 +32,7 @@ const toolDescriptionMap: Record<string, (args: ToolArgs) => string | Promise<st
 		args.diffStrategy ? args.diffStrategy.getToolDescription({ cwd: args.cwd, toolOptions: args.toolOptions }) : "",
 }
 
-export function getToolDescriptionsForMode(context: ToolArgs): string {
+export async function getToolDescriptionsForMode(context: ToolArgs): Promise<string> {
 	const config = getModeConfig(context.mode)
 
 	// Map tool descriptions in the exact order specified in the mode's tools array
@@ -47,7 +47,8 @@ export function getToolDescriptionsForMode(context: ToolArgs): string {
 		return descriptionFn(context)
 	})
 
-	return `# Tools\n\n${descriptions.filter(Boolean).join("\n\n")}`
+	const resolvedDescriptions = await Promise.all(descriptions.filter(Boolean))
+	return `# Tools\n\n${resolvedDescriptions.join("\n\n")}`
 }
 
 // Export individual description functions for backward compatibility
