@@ -2,13 +2,9 @@ import { DiffStrategy } from "../../diff/DiffStrategy"
 import { renderTemplate } from "../template-loader"
 import fs from "fs/promises"
 import path from "path"
-import { PromptContext } from "../system"
-import * as vscode from "vscode"
+import { ToolArgs } from "../tools/types"
 
-export async function getRulesSection(
-	extensionContext: vscode.ExtensionContext,
-	context: PromptContext,
-): Promise<string> {
+export async function getRulesSection(context: ToolArgs): Promise<string> {
 	// First, check for a custom rules file
 	const customRulesPath = path.join(context.cwd, ".clinerules-rules")
 	try {
@@ -24,5 +20,5 @@ export async function getRulesSection(
 	}
 
 	// If no custom rules, fall back to template
-	return renderTemplate("rules", context, extensionContext)
+	return renderTemplate("rules", context)
 }

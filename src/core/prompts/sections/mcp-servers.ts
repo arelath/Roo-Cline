@@ -1,13 +1,9 @@
 import { DiffStrategy } from "../../diff/DiffStrategy"
 import { McpHub } from "../../../services/mcp/McpHub"
 import { renderTemplate } from "../template-loader"
-import * as vscode from "vscode"
-import { PromptContext } from "../system"
+import { ToolArgs } from "../tools/types"
 
-export async function getMcpServersSection(
-	extensionContext: vscode.ExtensionContext,
-	context: PromptContext,
-): Promise<string> {
+export async function getMcpServersSection(context: ToolArgs): Promise<string> {
 	if (!context.mcpHub) {
 		return ""
 	}
@@ -49,5 +45,5 @@ export async function getMcpServersSection(
 					.join("\n\n")
 			: "(No MCP servers currently connected)"
 
-	return renderTemplate("mcp-servers", context, extensionContext)
+	return renderTemplate("mcp-servers", context)
 }

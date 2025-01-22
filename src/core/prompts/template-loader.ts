@@ -2,7 +2,7 @@ import * as Handlebars from "handlebars"
 import * as fs from "fs/promises"
 import * as path from "path"
 import * as vscode from "vscode"
-import { PromptContext } from "./system"
+import { ToolArgs } from "./tools/types"
 
 export interface TemplateCache {
 	[key: string]: Handlebars.TemplateDelegate
@@ -10,13 +10,9 @@ export interface TemplateCache {
 
 const templateCache: TemplateCache = {}
 
-export async function loadTemplate(
-	templateName: string,
-	extensionContext?: vscode.ExtensionContext,
-	context?: PromptContext,
-): Promise<Handlebars.TemplateDelegate> {
+export async function loadTemplate(templateName: string, context: ToolArgs): Promise<Handlebars.TemplateDelegate> {
 	// Check for local template override if context.cwd is provided
-	if (context?.cwd) {
+	if (context.cwd) {
 		const localTemplatePath = path.join(context.cwd, `.clinerules-${templateName}`)
 		try {
 			const templateContent = await fs.readFile(localTemplatePath, "utf-8")
@@ -34,10 +30,10 @@ export async function loadTemplate(
 
 	// Load default template
 	let templatePath: string
-	if (extensionContext) {
+	if (context.extensionContext) {
 		// Use extension context to resolve path during runtime
 		templatePath = path.join(
-			extensionContext.extensionPath,
+			context.extensionContext.extensionPath,
 			"dist",
 			"core",
 			"prompts",
@@ -61,11 +57,7 @@ export async function loadTemplate(
 	}
 }
 
-export async function renderTemplate(
-	templateName: string,
-	context: PromptContext,
-	extensionContext: vscode.ExtensionContext,
-): Promise<string> {
-	const template = await loadTemplate(templateName, extensionContext, context)
+export async function renderTemplate(templateName: string, context: ToolArgs): Promise<string> {
+	const template = await loadTemplate(templateName, context)
 	return template(context)
 }

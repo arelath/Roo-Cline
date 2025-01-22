@@ -1,12 +1,8 @@
 import { DiffStrategy } from "../../diff/DiffStrategy"
 import { McpHub } from "../../../services/mcp/McpHub"
 import { renderTemplate } from "../template-loader"
-import * as vscode from "vscode"
-import { PromptContext } from "../system"
+import { ToolArgs } from "../tools/types"
 
-export function getCapabilitiesSection(
-	extensionContext: vscode.ExtensionContext,
-	context: PromptContext,
-): Promise<string> {
-	return renderTemplate("capabilities", context, extensionContext)
+export function getCapabilitiesSection(context: ToolArgs): Promise<string> {
+	return renderTemplate("capabilities", context)
 }

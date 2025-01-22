@@ -1,10 +1,6 @@
 import { renderTemplate } from "../template-loader"
-import { PromptContext } from "../system"
-import * as vscode from "vscode"
+import { ToolArgs } from "../tools/types"
 
-export function getObjectiveSection(
-	extensionContext: vscode.ExtensionContext,
-	context: PromptContext,
-): Promise<string> {
-	return renderTemplate("objective", context, extensionContext)
+export function getObjectiveSection(context: ToolArgs): Promise<string> {
+	return renderTemplate("objective", context)
 }

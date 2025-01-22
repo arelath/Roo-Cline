@@ -1,4 +1,4 @@
-import { getExecuteCommandDescription } from "./execute-command"
+import { renderTemplate } from "../template-loader"
 import { getReadFileDescription } from "./read-file"
 import { getWriteToFileDescription } from "./write-to-file"
 import { getSearchFilesDescription } from "./search-files"
@@ -14,34 +14,26 @@ import { McpHub } from "../../../services/mcp/McpHub"
 import { Mode, ToolName, getModeConfig, isToolAllowedForMode } from "../../../shared/modes"
 import { ToolArgs } from "./types"
 import * as vscode from "vscode"
-import { PromptContext } from "../system"
 
 // Map of tool names to their description functions
-const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined> = {
-	execute_command: (args) => getExecuteCommandDescription(args),
-	read_file: (args) => getReadFileDescription(args),
-	write_to_file: (args) => getWriteToFileDescription(args),
-	search_files: (args) => getSearchFilesDescription(args),
-	list_files: (args) => getListFilesDescription(args),
-	list_code_definition_names: (args) => getListCodeDefinitionNamesDescription(args),
-	browser_action: (args) => getBrowserActionDescription(args),
-	ask_followup_question: () => getAskFollowupQuestionDescription(),
-	attempt_completion: () => getAttemptCompletionDescription(),
-	use_mcp_tool: (args) => getUseMcpToolDescription(args),
-	access_mcp_resource: (args) => getAccessMcpResourceDescription(args),
+const toolDescriptionMap: Record<string, (args: ToolArgs) => string | Promise<string> | undefined> = {
+	execute_command: async (args) => renderTemplate("tools.execute_command", args),
+	read_file: (args) => renderTemplate("tools.read_file", args),
+	write_to_file: (args) => renderTemplate("tools.write_to_file", args),
+	search_files: (args) => renderTemplate("tools.search_files", args),
+	list_files: (args) => renderTemplate("tools.list_files", args),
+	list_code_definition_names: (args) => renderTemplate("tools.list_code_definition_names", args),
+	browser_action: (args) => renderTemplate("tools.browser_action", args),
+	ask_followup_question: (args) => renderTemplate("tools.ask_followup_question", args),
+	attempt_completion: (args) => renderTemplate("tools.attempt_completion", args),
+	use_mcp_tool: (args) => renderTemplate("tools.use_mcp_tool", args),
+	access_mcp_resource: (args) => renderTemplate("tools.access_mcp_resource", args),
 	apply_diff: (args) =>
 		args.diffStrategy ? args.diffStrategy.getToolDescription({ cwd: args.cwd, toolOptions: args.toolOptions }) : "",
 }
 
-export function getToolDescriptionsForMode(extensionContext: vscode.ExtensionContext, context: PromptContext): string {
+export function getToolDescriptionsForMode(context: ToolArgs): string {
 	const config = getModeConfig(context.mode)
-	const args: ToolArgs = {
-		cwd: context.cwd,
-		supportsComputerUse: context.supportsComputerUse,
-		diffStrategy: context.diffStrategy,
-		browserViewportSize: context.browserViewportSize,
-		mcpHub: context.mcpHub,
-	}
 
 	// Map tool descriptions in the exact order specified in the mode's tools array
 	const descriptions = config.tools.map(([toolName, toolOptions]) => {
@@ -50,10 +42,9 @@ export function getToolDescriptionsForMode(extensionContext: vscode.ExtensionCon
 			return undefined
 		}
 
-		return descriptionFn({
-			...args,
-			toolOptions,
-		})
+		context.toolOptions = toolOptions
+
+		return descriptionFn(context)
 	})
 
 	return `# Tools\n\n${descriptions.filter(Boolean).join("\n\n")}`
@@ -61,7 +52,6 @@ export function getToolDescriptionsForMode(extensionContext: vscode.ExtensionCon
 
 // Export individual description functions for backward compatibility
 export {
-	getExecuteCommandDescription,
 	getReadFileDescription,
 	getWriteToFileDescription,
 	getSearchFilesDescription,

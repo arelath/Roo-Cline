@@ -2,6 +2,7 @@ import { Mode, modes, CustomPrompts, PromptComponent, getRoleDefinition, default
 import { DiffStrategy } from "../diff/DiffStrategy"
 import { McpHub } from "../../services/mcp/McpHub"
 import { getToolDescriptionsForMode } from "./tools"
+import { ToolArgs } from "./tools/types"
 import {
 	getRulesSection,
 	getSystemInfoSection,
@@ -14,16 +15,6 @@ import {
 import fs from "fs/promises"
 import path from "path"
 import * as vscode from "vscode"
-
-export type PromptContext = {
-	cwd: string
-	supportsComputerUse: boolean
-	mode: Mode
-	mcpHub?: McpHub
-	diffStrategy?: DiffStrategy
-	browserViewportSize?: string
-	promptComponent?: PromptComponent
-}
 
 async function loadRuleFiles(cwd: string, mode: Mode): Promise<string> {
 	let combinedRules = ""
@@ -102,24 +93,24 @@ ${joinedInstructions}`
 		: ""
 }
 
-async function generatePrompt(extensionContext: vscode.ExtensionContext, context: PromptContext): Promise<string> {
+async function generatePrompt(extensionContext: vscode.ExtensionContext, context: ToolArgs): Promise<string> {
 	const basePrompt = `${context.promptComponent?.roleDefinition || getRoleDefinition(context.mode)}
 
-${await getSharedToolUseSection(extensionContext, context)}
+${await getSharedToolUseSection(context)}
 
-${getToolDescriptionsForMode(extensionContext, context)}
+${getToolDescriptionsForMode(context)}
 
-${await getToolUseGuidelinesSection(extensionContext, context)}
+${await getToolUseGuidelinesSection(context)}
 
-${await getMcpServersSection(extensionContext, context)}
+${await getMcpServersSection(context)}
 
-${await getCapabilitiesSection(extensionContext, context)}
+${await getCapabilitiesSection(context)}
 
-${await getRulesSection(extensionContext, context)}
+${await getRulesSection(context)}
 
-${await getSystemInfoSection(extensionContext, context)}
+${await getSystemInfoSection(context)}
 
-${await getObjectiveSection(extensionContext, context)}`
+${await getObjectiveSection(context)}`
 
 	return basePrompt
 }
@@ -145,14 +136,15 @@ export const SYSTEM_PROMPT = async (
 	const currentMode = modes.find((m) => m.slug === mode) || modes[0]
 	const promptComponent = getPromptComponent(customPrompts?.[currentMode.slug])
 
-	const context: PromptContext = {
-		cwd,
-		supportsComputerUse,
+	const context: ToolArgs = {
+		cwd: cwd,
+		extensionContext: extensionContext,
+		supportsComputerUse: supportsComputerUse,
 		mode: currentMode.slug,
-		mcpHub,
-		diffStrategy,
-		browserViewportSize,
-		promptComponent,
+		mcpHub: mcpHub,
+		diffStrategy: diffStrategy,
+		browserViewportSize: browserViewportSize,
+		promptComponent: promptComponent,
 	}
 
 	return generatePrompt(extensionContext, context)
