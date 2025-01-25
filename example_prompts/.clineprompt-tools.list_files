@@ -1,0 +1,5 @@
+# list_files: Show directory contents. Format:
+<list_files>
+<path>directory path</path>
+<recursive>true/false (optional)</recursive>
+</list_files>

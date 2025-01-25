@@ -1,19 +1,8 @@
 import { renderTemplate } from "../template-loader"
-import { getReadFileDescription } from "./read-file"
-import { getWriteToFileDescription } from "./write-to-file"
-import { getSearchFilesDescription } from "./search-files"
-import { getListFilesDescription } from "./list-files"
-import { getListCodeDefinitionNamesDescription } from "./list-code-definition-names"
-import { getBrowserActionDescription } from "./browser-action"
-import { getAskFollowupQuestionDescription } from "./ask-followup-question"
-import { getAttemptCompletionDescription } from "./attempt-completion"
-import { getUseMcpToolDescription } from "./use-mcp-tool"
-import { getAccessMcpResourceDescription } from "./access-mcp-resource"
 import { DiffStrategy } from "../../diff/DiffStrategy"
 import { McpHub } from "../../../services/mcp/McpHub"
 import { Mode, ToolName, getModeConfig, isToolAllowedForMode } from "../../../shared/modes"
 import { ToolArgs } from "./types"
-import * as vscode from "vscode"
 
 // Map of tool names to their description functions
 const toolDescriptionMap: Record<string, (args: ToolArgs) => string | Promise<string> | undefined> = {
@@ -52,7 +41,7 @@ export async function getToolDescriptionsForMode(context: ToolArgs): Promise<str
 }
 
 // Export individual description functions for backward compatibility
-export {
+/*export {
 	getReadFileDescription,
 	getWriteToFileDescription,
 	getSearchFilesDescription,
@@ -63,4 +52,4 @@ export {
 	getAttemptCompletionDescription,
 	getUseMcpToolDescription,
 	getAccessMcpResourceDescription,
-}
+}*/

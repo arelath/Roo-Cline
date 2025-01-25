@@ -1,0 +1,6 @@
+#. write_to_file: Write complete file content. Creates directories as needed. Format:
+<write_to_file>
+<path>file path</path>
+<content>complete file content</content>
+<line_count>total lines</line_count>
+</write_to_file>

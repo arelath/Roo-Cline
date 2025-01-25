@@ -1,0 +1,13 @@
+# apply_diff: Make precise code changes. Only a single search and replace block is allowed in the apply_diff tool, but you are encouraged to call this tool multiple times per message. If changing two lines next to each other, please combine the search and replace blocks Format:
+<apply_diff>
+<path>file path</path>
+<diff>
+<<<<<<< SEARCH
+[exact content to find]
+=======
+[new content]
+>>>>>>> REPLACE
+</diff>
+<start_line>start</start_line>
+<end_line>end</end_line>
+</apply_diff>

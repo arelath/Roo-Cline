@@ -1,8 +1,10 @@
 import * as Handlebars from "handlebars"
 import * as fs from "fs/promises"
 import * as path from "path"
-import * as vscode from "vscode"
 import { ToolArgs } from "./tools/types"
+import defaultShell from "default-shell"
+import os from "os"
+import osName from "os-name"
 
 export interface TemplateCache {
 	[key: string]: Handlebars.TemplateDelegate
@@ -13,7 +15,7 @@ const templateCache: TemplateCache = {}
 export async function loadTemplate(templateName: string, context: ToolArgs): Promise<Handlebars.TemplateDelegate> {
 	// Check for local template override if context.cwd is provided
 	if (context.cwd) {
-		const localTemplatePath = path.join(context.cwd, `.clinerules-${templateName}`)
+		const localTemplatePath = path.join(context.cwd, `.clineprompt-${templateName}`)
 		try {
 			const templateContent = await fs.readFile(localTemplatePath, "utf-8")
 			// Don't cache local template content since it may change
@@ -48,6 +50,7 @@ export async function loadTemplate(templateName: string, context: ToolArgs): Pro
 	try {
 		const templateContent = await fs.readFile(templatePath, "utf-8")
 		const template = Handlebars.compile(templateContent)
+
 		// Only cache default templates
 		templateCache[templateName] = template
 		return template
@@ -59,5 +62,10 @@ export async function loadTemplate(templateName: string, context: ToolArgs): Pro
 
 export async function renderTemplate(templateName: string, context: ToolArgs): Promise<string> {
 	const template = await loadTemplate(templateName, context)
-	return template(context)
+	return template({
+		...context,
+		osName: osName,
+		defaultShell: defaultShell,
+		homeDirectory: os.homedir().toPosix(),
+	})
 }
