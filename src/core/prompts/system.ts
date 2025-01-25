@@ -5,7 +5,6 @@ import { getToolDescriptionsForMode } from "./tools"
 import { ToolArgs } from "./tools/types"
 import {
 	getRulesSection,
-	getSystemInfoSection,
 	getObjectiveSection,
 	getSharedToolUseSection,
 	getMcpServersSection,
@@ -15,6 +14,7 @@ import {
 import fs from "fs/promises"
 import path from "path"
 import * as vscode from "vscode"
+import { renderTemplate } from "./template-loader"
 
 async function loadRuleFiles(cwd: string, mode: Mode): Promise<string> {
 	let combinedRules = ""
@@ -108,7 +108,7 @@ ${await getCapabilitiesSection(context)}
 
 ${await getRulesSection(context)}
 
-${await getSystemInfoSection(context)}
+${await renderTemplate("system-info", context)}
 
 ${await getObjectiveSection(context)}`
 

@@ -1,4 +1,4 @@
-# read_file: Get file contents with line numbers. You can and are encouraged to call this tool multiple times per message. Format:
+# read_file: Get file contents with line numbers. Format:
 <read_file>
 <path>file path</path>
 </read_file>
