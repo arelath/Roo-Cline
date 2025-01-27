@@ -1,7 +1,61 @@
-import { globby, Options } from "globby"
+import * as vscode from "vscode"
+import { globby, Options, isGitIgnored, GitignoreOptions } from "globby"
 import os from "os"
 import * as path from "path"
 import { arePathsEqual } from "../../utils/path"
+
+export async function listFilesInWorkspace(
+	recursive: boolean,
+	limit: number,
+	dirPath?: string,
+): Promise<[string[], boolean]> {
+	/*const folders = vscode.workspace.workspaceFolders;
+	if (!folders) {
+		return [[], false]
+	}*/
+
+	const ignorePattern =
+		"**/+(" +
+		[
+			"node_modules",
+			"__pycache__",
+			"env",
+			"venv",
+			"target/dependency",
+			"build/dependencies",
+			"dist",
+			"out",
+			"bundle",
+			"vendor",
+			"tmp",
+			"temp",
+			"deps",
+			"pkg",
+			"Pods",
+			".*", // '!**/.*' excludes hidden directories, while '!**/.*/**' excludes only their contents. This way we are at least aware of the existence of hidden directories.
+		].join("|") +
+		")/**"
+
+	var searchPath = dirPath ? dirPath + "/" : ""
+	searchPath = searchPath || ""
+
+	const cwd = vscode.workspace.workspaceFolders?.at(0)?.uri.fsPath
+	var relativePath = cwd ? path.relative(cwd, dirPath || "") : ""
+	if (relativePath.length > 0) relativePath += "/"
+	relativePath += recursive ? "**/*" : "*"
+	relativePath = relativePath.toPosix()
+
+	// TODO: use the folder parameter to limit the search to a specific workspace folder
+	//var files = await vscode.workspace.findFiles(`**/*`, ignorePattern, limit)
+	var files = await vscode.workspace.findFiles(relativePath, ignorePattern, limit)
+
+	var filePaths = files.map((file) => file.fsPath)
+
+	//const isIgnored = await isGitIgnored({cwd: cwd})
+	//filePaths = filePaths.filter((filePath) => !isIgnored(filePath))
+
+	return [filePaths, true]
+}
 
 export async function listFiles(dirPath: string, recursive: boolean, limit: number): Promise<[string[], boolean]> {
 	const absolutePath = path.resolve(dirPath)
@@ -16,6 +70,8 @@ export async function listFiles(dirPath: string, recursive: boolean, limit: numb
 	if (isHomeDir) {
 		return [[homeDir], false]
 	}
+
+	return listFilesInWorkspace(recursive, limit, dirPath)
 
 	const dirsToIgnore = [
 		"node_modules",
@@ -34,7 +90,7 @@ export async function listFiles(dirPath: string, recursive: boolean, limit: numb
 		"pkg",
 		"Pods",
 		".*", // '!**/.*' excludes hidden directories, while '!**/.*/**' excludes only their contents. This way we are at least aware of the existence of hidden directories.
-	].map((dir) => `**/${dir}/**`)
+	].map((dir) => `**/${dir}/`)
 
 	const options = {
 		cwd: dirPath,
@@ -86,7 +142,7 @@ async function globbyLevelByLevel(limit: number, options?: Options) {
 
 	// Timeout after 10 seconds and return partial results
 	const timeoutPromise = new Promise<string[]>((_, reject) => {
-		setTimeout(() => reject(new Error("Globbing timeout")), 10_000)
+		setTimeout(() => reject(new Error("Globbing timeout")), 100_000)
 	})
 	try {
 		return await Promise.race([globbingProcess(), timeoutPromise])

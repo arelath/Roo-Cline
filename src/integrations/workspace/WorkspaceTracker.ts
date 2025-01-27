@@ -1,10 +1,10 @@
 import * as vscode from "vscode"
 import * as path from "path"
-import { listFiles } from "../../services/glob/list-files"
+import { listFilesInWorkspace, listFiles } from "../../services/glob/list-files"
 import { ClineProvider } from "../../core/webview/ClineProvider"
 
 const cwd = vscode.workspace.workspaceFolders?.map((folder) => folder.uri.fsPath).at(0)
-const MAX_INITIAL_FILES = 1_000
+const MAX_INITIAL_FILES = 10_000
 
 // Note: this is not a drop-in replacement for listFiles at the start of tasks, since that will be done for Desktops when there is no workspace selected
 class WorkspaceTracker {
@@ -23,6 +23,7 @@ class WorkspaceTracker {
 		if (!cwd) {
 			return
 		}
+
 		const [files, _] = await listFiles(cwd, true, MAX_INITIAL_FILES)
 		files.slice(0, MAX_INITIAL_FILES).forEach((file) => this.filePaths.add(this.normalizeFilePath(file)))
 		this.workspaceDidUpdate()
