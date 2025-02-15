@@ -1,0 +1,8 @@
+Before taking any action, use <task_analysis> tags to plan your approach. Follow these steps:
+1. Think about all available tools and their primary functions.
+2. Identify which tools are most relevant to the given task.
+3. Outline a step-by-step plan for approaching the task, including which tool to use at each step.
+4. Consider potential edge cases or complications that might arise.
+5. Group related changes when possible to make efficient use of the tools and avoid unnecessary repetition.
+
+This analysis will help you make efficient use of the tools and avoid unnecessary repetition.

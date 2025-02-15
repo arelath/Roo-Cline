@@ -1,0 +1,6 @@
+# search_files: Regex search across files. Format:
+<search_files>
+<path>directory path</path>
+<regex>pattern</regex>
+<file_pattern>optional glob</file_pattern>
+</search_files>

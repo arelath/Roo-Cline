@@ -1,0 +1,5 @@
+# attempt_completion: Present final result. Use only after confirming previous tool success. Format:
+<attempt_completion>
+<result>final result description</result>
+<command>cli demo command(optional)</command>
+</attempt_completion>

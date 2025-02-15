@@ -1,0 +1,2 @@
+TOOLS AND FORMATTING:
+Tools are used with XML tags. Format: <tool_name><param_name>value</param_name></tool_name>

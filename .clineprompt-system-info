@@ -1,0 +1,4 @@
+# SYSTEM INFORMATION
+System: {{osName}}
+Shell: {{defaultShell}}
+Home Directory: {{homeDirectory}}

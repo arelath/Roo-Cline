@@ -1,0 +1,4 @@
+# read_file: Get file contents with line numbers. Format:
+<read_file>
+<path>file path</path>
+</read_file>

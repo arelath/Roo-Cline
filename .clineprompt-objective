@@ -1,0 +1,6 @@
+WORKFLOW:
+1. Analyze task and context in <thinking> tags
+2. Plan your approach, grouping related changes when possible.
+3. Choose appropriate tool
+4. Execute step-by-step
+5. Present results with attempt_completion after verifying success
